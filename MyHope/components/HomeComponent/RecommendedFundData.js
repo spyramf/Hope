@@ -1,0 +1,38 @@
+export const RecommendedFundData = [
+  {
+    _id: 1,
+    fundName: "Nippon India Multi Cap Fund",
+    fundSubType: "Multi Cap Fund",
+    fundType: "Equity Scheme",
+    oneYear: "23%",
+    data: "",
+    logo: "https://res.cloudinary.com/dn4lynsqg/image/upload/v1716724932/NipponIndiaMutualFund_MF_xwgao5.png",
+  },
+  {
+    _id: 2,
+    fundName: "SBI Flexicap Fund",
+    fundSubType: "Flexi Cap Fund",
+    fundType: "Equity Scheme",
+    oneYear: "45%",
+    data: "",
+    logo: "https://res.cloudinary.com/dn4lynsqg/image/upload/v1716724947/SBIMutualFund_MF_vlepj4.png",
+  },
+  {
+    _id: 3,
+    fundName: "DSP Midcap Fund",
+    fundSubType: "Mid Cap Fund",
+    fundType: "Equity Scheme",
+    oneYear: "67%",
+    data: "",
+    logo: "https://res.cloudinary.com/dn4lynsqg/image/upload/v1716724894/DSP_MF_ldcmej.png",
+  },
+  {
+    _id: 4,
+    fundName: "Quant Large and Mid Cap Fund",
+    fundSubType: "Large & Mid Cap Fund",
+    fundType: "Equity Scheme",
+    oneYear: "72%",
+    data: "",
+    logo: "https://res.cloudinary.com/dn4lynsqg/image/upload/v1716727041/QUANTMUTUALFUND_MF_hn6emi.png",
+  },
+];
