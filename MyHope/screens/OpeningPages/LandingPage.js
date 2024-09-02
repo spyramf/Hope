@@ -137,7 +137,7 @@ console.log(savedEmail);
       <View style={{ top: 20, padding: 30 }}>
         <OnBtn
           title="Log In"
-          handelSubmit={() => navigation.navigate("OTP Verification")}
+          handelSubmit={() => navigation.navigate("Login")}
         />
       </View>
     </View>
