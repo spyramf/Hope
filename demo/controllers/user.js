@@ -33,38 +33,7 @@ exports.createUser = async (req, res) => {
 
   res.json({ success: true, user });
 
-<<<<<<< HEAD
-    await user.save();
-
-
-    res.json({ success: true, user });
-
-    console.log(res.json);
-}
-
-
-exports.userSignIn = async (req, res) => {
-    const { email, password } = req.body
-
-    console.log(req.body);
-
-    const user = await User.findOne({ email })
-
-    if (!user) return res.json({ success: false, message: "user not found,with the given email" })
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.json({ success: false, message: "email / password does not match!" });
-
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '90d', });
-    const userInfo = {
-        mobile: user.mobile,
-        email: user.email,
-        avatar: user.avatar ? user.avatar : '',
-    }
-    res.json({ success: true, user: userInfo, user, token })
-=======
   console.log(res.json);
->>>>>>> 9c2d60ea77c3fa46b9a308013530faee637fa445
 };
 
 exports.userSignIn = async (req, res) => {
