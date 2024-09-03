@@ -14,9 +14,12 @@ importers:
       cloudinary:
         specifier: ^2.2.0
         version: 2.4.0
+<<<<<<< HEAD
       crypto:
         specifier: ^1.0.1
         version: 1.0.1
+=======
+>>>>>>> 2d34638 (add mail)
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -35,9 +38,12 @@ importers:
       multer:
         specifier: ^1.4.5-lts.1
         version: 1.4.5-lts.1
+<<<<<<< HEAD
       nodemailer:
         specifier: ^6.9.14
         version: 6.9.15
+=======
+>>>>>>> 2d34638 (add mail)
       nodemon:
         specifier: ^3.1.0
         version: 3.1.4
@@ -303,10 +309,13 @@ packages:
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
 
+<<<<<<< HEAD
   crypto@1.0.1:
     resolution: {integrity: sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==}
     deprecated: This package is no longer supported. It's now a built-in Node module. If you've depended on crypto, you should switch to the one that's built-in.
 
+=======
+>>>>>>> 2d34638 (add mail)
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     peerDependencies:
@@ -675,10 +684,13 @@ packages:
       encoding:
         optional: true
 
+<<<<<<< HEAD
   nodemailer@6.9.15:
     resolution: {integrity: sha512-AHf04ySLC6CIfuRtRiEYtGEXgRfa6INgWGluDhnxTZhHSKvrBu7lc1VVchQ0d8nPc4cFaZoPq8vkyNoZr0TpGQ==}
     engines: {node: '>=6.0.0'}
 
+=======
+>>>>>>> 2d34638 (add mail)
   nodemon@3.1.4:
     resolution: {integrity: sha512-wjPBbFhtpJwmIeY2yP7QF+UKzPfltVGtfce1g/bB15/8vCGZj8uxD62b/b9M9/WVgme0NZudpownKN+c0plXlQ==}
     engines: {node: '>=10'}
@@ -1201,8 +1213,11 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
+<<<<<<< HEAD
   crypto@1.0.1: {}
 
+=======
+>>>>>>> 2d34638 (add mail)
   debug@2.6.9:
     dependencies:
       ms: 2.0.0
@@ -1569,8 +1584,11 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
+<<<<<<< HEAD
   nodemailer@6.9.15: {}
 
+=======
+>>>>>>> 2d34638 (add mail)
   nodemon@3.1.4:
     dependencies:
       chokidar: 3.6.0
