@@ -7,6 +7,7 @@ const router = express.Router();
 const {
   createUser,
   verifyOtp,
+	userController,
   userSignIn,
   uploadProfile,
   enterPan,
