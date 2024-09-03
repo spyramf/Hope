@@ -4,7 +4,20 @@ const express = require('express');
 
 
 const router = express.Router();
-const { createUser, userSignIn, uploadProfile, enterPan, personalDetails, NomineeDetail, BankDetail, annualIncome, s_data,u_data } = require('../controllers/user');
+const {
+  createUser,
+  verifyOtp,
+  userSignIn,
+  uploadProfile,
+  enterPan,
+  personalDetails,
+  NomineeDetail,
+  BankDetail,
+  annualIncome,
+  s_data,
+  u_data,
+  emailOtp,
+} = require("../controllers/user");
 const { validateUserSignUp, userValidation, validateUserSignIn, validateUserPan, validateUserPersonalDetails, validateUserNomineeDetails, validateUserBankDetails } = require('../middlewares/validation/user');
 const { isAuth } = require('../middlewares/auth');
 
@@ -43,6 +56,10 @@ router.post('/nominee-details', isAuth, validateUserNomineeDetails, NomineeDetai
 router.post('/bank-details', isAuth, validateUserBankDetails, BankDetail);
 
 router.post('/annual-income', isAuth, annualIncome);
+
+router.post("/request-otp", emailOtp); 
+
+router.post("/verify-otp", verifyOtp); 
 
 router.get('/get-name', s_data);
 
