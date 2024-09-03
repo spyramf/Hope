@@ -202,7 +202,7 @@ exports.emailOtp = async (req, res) => {
     from: process.env.EMAIL_USER,
     to: email,
     subject: "Your OTP Code",
-    text: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
+    text: `Your Money Bharat OTP code is ${otp}. It will expire in 10 minutes.`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
