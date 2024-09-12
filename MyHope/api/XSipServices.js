@@ -9,7 +9,18 @@ import {
   MemberCode,
 } from "./bseLogin";
 
-const sendXSipRequest = async () => {
+
+
+const sendXSipRequest = async ({
+  SchemeCode,
+  ucc,
+  StartDate,
+  FrequencyType,
+  InstallmentAmount,
+  MandateID,
+  UniqueRefNo,
+  InternalRefNo,
+}) => {
   try {
     // API 1
     const dataPass = `
@@ -63,37 +74,34 @@ const sendXSipRequest = async () => {
 
     console.log("Extracted value from getPassword:", parsedResponse);
 
-
-
-
-
     const dataSip = `
       <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:bses="http://bsestarmf.in/">
         <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
           <wsa:Action>http://bsestarmf.in/MFOrderEntry/xsipOrderEntryParam</wsa:Action>
-          <wsa:To>https://bsestarmfdemo.bseindia.com/MFOrderEntry/MFOrder.svc/Secure</wsa:To>
+          <wsa:To>https://bsestarmf.in/MFOrderEntry/MFOrder.svc/Secure</wsa:To>
         </soap:Header>
         <soap:Body>
           <bses:xsipOrderEntryParam>
             <bses:TransactionCode>NEW</bses:TransactionCode>
-            <bses:UniqueRefNo>2023070210234000001</bses:UniqueRefNo>
-            <bses:SchemeCode>QUOFGP-GR</bses:SchemeCode>
+            <bses:UniqueRefNo>${UniqueRefNo}</bses:UniqueRefNo>
+            <bses:SchemeCode>${SchemeCode}</bses:SchemeCode>
             <bses:MemberCode>${MemberCode}</bses:MemberCode>
-            <bses:ClientCode>clientcode01</bses:ClientCode>
+            <bses:ClientCode>${ucc}</bses:ClientCode>
             <bses:UserId>${UserId}</bses:UserId>
-            <bses:InternalRefNo>123456</bses:InternalRefNo>
+            <bses:InternalRefNo>${InternalRefNo}</bses:InternalRefNo>
             <bses:TransMode>P</bses:TransMode>
             <bses:DpTxnMode>P</bses:DpTxnMode>
-            <bses:StartDate>10/08/2023</bses:StartDate>
-            <bses:FrequencyType>MONTHLY</bses:FrequencyType>
+            <bses:StartDate>${StartDate}</bses:StartDate>
+             <bses:EndDate>${StartDate}</bses:EndDate>
+            <bses:FrequencyType>${FrequencyType}</bses:FrequencyType>
             <bses:FrequencyAllowed>1</bses:FrequencyAllowed>
-            <bses:InstallmentAmount>1000</bses:InstallmentAmount>
-            <bses:NoOfInstallment>20</bses:NoOfInstallment>
+            <bses:InstallmentAmount>${InstallmentAmount}</bses:InstallmentAmount>
+            <bses:NoOfInstallment>9999</bses:NoOfInstallment>
             <bses:Remarks></bses:Remarks>
             <bses:FolioNo></bses:FolioNo>
             <bses:FirstOrderFlag>Y</bses:FirstOrderFlag>
             <bses:Brokerage></bses:Brokerage>
-            <bses:MandateID>780039</bses:MandateID>
+            <bses:MandateID>${MandateID}</bses:MandateID>
             <bses:SubberCode></bses:SubberCode>
             <bses:Euin></bses:Euin>
             <bses:EuinVal>N</bses:EuinVal>

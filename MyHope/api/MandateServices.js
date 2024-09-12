@@ -4,39 +4,31 @@ import {
   UserId,
   Password,
   PassKey,
-  XSipPassUrl,
-  XSipOrderUrl,
-  MemberCode,
   ManFatPassUrl,
+  MemberCode,
 } from "./bseLogin";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Linking, Alert } from "react-native";
 
-const sendXManRequest = async () => {
-
-  const Log = await AsyncStorage.getItem("LoginData");
-  const parsedLog = JSON.parse(Log);
-  console.log(parsedLog);
-  // const param = `${parsedLog.user.mobile}|500000|X|${parsedLog.user.accNo}|${parsedLog.user.accType}|${parsedLog.user.ifsc}||18/08/2024|01/02/2054`;
-const param = "IW50078199|1000000|X|914010019699759|SB|UTIB0000615||22/08/2024|01/02/2054";
+const sendXManRequest = async ({ Flag, param, ClientCode }) => {
   try {
-    // API 1
+    // Step 1: Request password from getPassword API
     const dataPass = `
-<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://www.bsestarmf.in/2016/01/">
-   <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
-      <wsa:Action>http://www.bsestarmf.in/2016/01/IStarMFWebService/getPassword</wsa:Action>
-      <wsa:To>${ManFatPassUrl}</wsa:To>
-   </soap:Header>
-   <soap:Body>
-      <ns:getPassword>
-         <ns:UserId>${UserId}</ns:UserId>
-         <ns:MemberId>${MemberCode}</ns:MemberId>
-         <ns:Password>${Password}</ns:Password>
-         <ns:PassKey>${PassKey}</ns:PassKey>
-      </ns:getPassword>
-   </soap:Body>
-</soap:Envelope>
-`;
-    const config = {
+      <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://www.bsestarmf.in/2016/01/">
+        <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
+          <wsa:Action>http://www.bsestarmf.in/2016/01/IStarMFWebService/getPassword</wsa:Action>
+          <wsa:To>${ManFatPassUrl}</wsa:To>
+        </soap:Header>
+        <soap:Body>
+          <ns:getPassword>
+            <ns:UserId>${UserId}</ns:UserId>
+            <ns:MemberId>${MemberCode}</ns:MemberId>
+            <ns:Password>${Password}</ns:Password>
+            <ns:PassKey>${PassKey}</ns:PassKey>
+          </ns:getPassword>
+        </soap:Body>
+      </soap:Envelope>`;
+
+    const configPass = {
       method: "post",
       maxBodyLength: Infinity,
       url: ManFatPassUrl,
@@ -46,94 +38,155 @@ const param = "IW50078199|1000000|X|914010019699759|SB|UTIB0000615||22/08/2024|0
       data: dataPass,
     };
 
-    const response = await axios.request(config);
-    console.log("Response data from getPassword:", response.data);
+    // Making the first API call to get the encrypted password
+    const response = await axios.request(configPass);
+    console.log("Response from getPassword API:", response.data);
 
-    const parsedResponse = await new Promise((resolve, reject) => {
+    // Parse the XML response from getPassword API
+    const encryptedPassword = await new Promise((resolve, reject) => {
       parseString(response.data, (err, result) => {
-        if (err) {
-          reject("Error parsing XML: " + err);
-        } else {
-          try {
-            console.log("Parsed XML for getPassword:", result);
-            const getPasswordResult =
-              result["s:Envelope"]["s:Body"][0]["getPasswordResponse"][0][
-                "getPasswordResult"
-              ][0];
-            const value = getPasswordResult.split("|")[1]; // Extract the value
-            resolve(value);
-          } catch (error) {
-            reject("Error extracting getPasswordResult: " + error);
-          }
+        if (err) return reject("Error parsing XML: " + err);
+        try {
+          const getPasswordResult =
+            result["s:Envelope"]["s:Body"][0]["getPasswordResponse"][0][
+              "getPasswordResult"
+            ][0];
+          const password = getPasswordResult.split("|")[1]; // Extract the password
+          resolve(password);
+        } catch (error) {
+          reject("Error extracting getPasswordResult: " + error);
         }
       });
     });
-console.log(parsedResponse);
-    console.log("Extracted value from getPassword:", parsedResponse);
 
+    console.log("Extracted encrypted password:", encryptedPassword);
 
+    // Step 2: Send the request to MFAPI using the retrieved password
+    const data = `
+      <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://www.bsestarmf.in/2016/01/">
+        <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
+          <wsa:Action>http://www.bsestarmf.in/2016/01/IStarMFWebService/MFAPI</wsa:Action>
+          <wsa:To>${ManFatPassUrl}</wsa:To>
+        </soap:Header>
+        <soap:Body>
+          <ns:MFAPI>
+            <ns:Flag>${Flag}</ns:Flag>
+            <ns:UserId>${UserId}</ns:UserId>
+            <ns:EncryptedPassword>${encryptedPassword}</ns:EncryptedPassword>
+            <ns:param>${param}</ns:param>
+          </ns:MFAPI>
+        </soap:Body>
+      </soap:Envelope>`;
 
+    const configData = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: ManFatPassUrl,
+      headers: {
+        "Content-Type": "application/soap+xml",
+      },
+      data: data,
+    };
 
+    // Making the second API call to MFAPI
+    const responseMan = await axios.request(configData);
+    console.log("Response from MFAPI:", responseMan.data);
 
-const data = `
-<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://www.bsestarmf.in/2016/01/">
-   <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
-      <wsa:Action>http://www.bsestarmf.in/2016/01/IStarMFWebService/MFAPI</wsa:Action>
-      <wsa:To>${ManFatPassUrl}</wsa:To>
-   </soap:Header>
-   <soap:Body>
-      <ns:MFAPI>
-         <ns:Flag>06</ns:Flag>
-         <ns:UserId>${UserId}</ns:UserId>
-         <ns:EncryptedPassword>${parsedResponse}</ns:EncryptedPassword>
-         <ns:param>${param}</ns:param>
-      </ns:MFAPI>
-   </soap:Body>
-</soap:Envelope>
-`;
-const configData = {
-  method: "post",
-  maxBodyLength: Infinity,
-  url: ManFatPassUrl,
-  headers: {
-    "Content-Type": "application/soap+xml",
-  },
-  data: data,
-};
-
-const responseMan = await axios.request(configData);
-console.log("Response data from getPassword:", responseMan.data);
-
-
-
-
-
-    const parsedResponseData = await new Promise((resolve, reject) => {
+    // Parse the XML response from MFAPI
+    const mandateID = await new Promise((resolve, reject) => {
       parseString(responseMan.data, (err, result) => {
-        if (err) {
-          reject("Error parsing XML: " + err);
-        } else {
-          try {
-            console.log("Parsed XML for getPassword:", result);
-            const getMFAPIResponse =
-              result["s:Envelope"]["s:Body"][0]["MFAPIResponse"][0][
-                "MFAPIResult"
-              ][0];
-            const value = getMFAPIResponse.split("|")[1]; // Extract the value
-            resolve(value);
-          } catch (error) {
-            reject("Error extracting getPasswordResult: " + error);
-          }
+        if (err) return reject("Error parsing XML: " + err);
+        try {
+          const getMFAPIResponse =
+            result["s:Envelope"]["s:Body"][0]["MFAPIResponse"][0][
+              "MFAPIResult"
+            ][0];
+          const id = getMFAPIResponse.split("|")[2]; // Extract the mandate ID
+          resolve(id);
+        } catch (error) {
+          reject("Error extracting MFAPIResult: " + error);
         }
       });
     });
-    console.log(parsedResponseData);
-    console.log("Extracted value from getPassword:", parsedResponseData);
-  
-    return responseMan.data;
+
+    console.log("Extracted mandate ID from MFAPIResult:", mandateID);
+
+    // Step 3: Make request to EMandateAuthURL with the mandate ID
+    const fetchEMandateAuthURL = async () => {
+      try {
+        const dataReg = JSON.stringify({
+          MemberCode: MemberCode,
+          Password: Password,
+          ClientCode: ClientCode,
+          UserId: UserId,
+          MandateID: mandateID,
+        });
+
+        const configReg = {
+          method: "post",
+          maxBodyLength: Infinity,
+          url: "https://www.bsestarmf.in/StarMFWebService/StarMFWebService.svc/EMandateAuthURL",
+          headers: {
+            "Content-Type": "application/json",
+            APIKEY: "VmxST1UyRkhUbkpOVldNOQ==",
+          },
+          data: dataReg,
+        };
+
+        const responseReg = await axios.request(configReg);
+        console.log("Response from EMandateAuthURL:", responseReg.data);
+
+        return responseReg.data;
+      } catch (error) {
+        console.error("Error fetching EMandateAuthURL:", error);
+        throw error;
+      }
+    };
+
+    // Function to check mandate status with timeout
+    const checkMandateStatus = async () => {
+      const timeout = 2 * 60 * 1000; // 2 minutes
+      const start = Date.now();
+
+      const interval = setInterval(async () => {
+        try {
+          const jsonResponse = await fetchEMandateAuthURL();
+          console.log("EMandateAuthURL response:", jsonResponse.Status);
+
+          if (jsonResponse.Status === 101) {
+            console.log("Status 101: Retrying in 10 seconds...");
+          } else if (jsonResponse.Status === 100) {
+            clearInterval(interval);
+            console.log("Status 100: Opening the URL...");
+
+            const url = jsonResponse.ResponseString;
+            try {
+              await Linking.openURL(url);
+              console.log("URL successfully opened:", url);
+            } catch (err) {
+              console.error("Error opening URL:", err);
+              Alert.alert("Error", "Failed to open the URL.");
+            }
+          }
+
+          // Stop the loop after 2 minutes
+          if (Date.now() - start >= timeout) {
+            clearInterval(interval);
+            console.log("Request timed out after 2 minutes.");
+          }
+        } catch (error) {
+          clearInterval(interval);
+          console.error("Error during mandate status check:", error);
+        }
+      }, 10000); // Run every 10 seconds
+    };
+
+    await checkMandateStatus();
   } catch (error) {
-    console.error("Error in sendXSipRequest:", error);
-    throw error;
+    console.error("Error in sendXManRequest:", error.message || error);
+    throw new Error(
+      `Failed to complete XMan request. Error: ${error.message || error}`
+    );
   }
 };
 

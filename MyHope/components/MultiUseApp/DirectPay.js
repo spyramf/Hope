@@ -11,26 +11,22 @@ const screenHeight = Dimensions.get("window").height;
 
 
 
-const DirectPay = () => {
-    const navigation = useNavigation();
+const DirectPay = ({ handlePay }) => {
+  const navigation = useNavigation();
 
-    return (
+  return (
+    <View style={styles.text_row_c}>
+      <View style={styles.textrow}>
+        <Text style={styles.pleaseUse}> Please Select </Text>
+        <Text style={styles.pageTitle8Typo}>Payment</Text>
+        <Text style={styles.pleaseUse}> Method</Text>
+      </View>
 
-        <View style={styles.text_row_c}>
-            <View style={styles.textrow}>
-                <Text style={styles.pleaseUse}> Please Select </Text>
-                <Text style={styles.pageTitle8Typo}>Payment</Text>
-                <Text style={styles.pleaseUse}> Method</Text>
-            </View>
-
-
-
-            <Pressable onPress={() => navigation.navigate("Home")}>
-                <Text style={[styles.setup_pay]}> Select To Pay </Text>
-            </Pressable>
-        </View>
-    );
-
+      <Pressable onPress={handlePay}>
+        <Text style={[styles.setup_pay]}> Select To Pay </Text>
+      </Pressable>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

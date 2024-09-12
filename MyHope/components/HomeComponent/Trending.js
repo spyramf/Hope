@@ -1,113 +1,70 @@
-import { View, Text, Dimensions, TouchableOpacity,StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import React from "react";
-import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 
-import { FontAwesome6 } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { MaterialIcons } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
-import FatComponent from "../BSEComponent/FatComponent";
+const { width, height } = Dimensions.get("window");
 
-
-
-const screenWidth = Dimensions.get("window").width;
-const screenHeight = Dimensions.get("window").height;
-
-
-const { width } = Dimensions.get("window");
-const { height } = Dimensions.get("window");
 const Trending = (props) => {
-  const navigation = useNavigation();
-
   const {
-    fourthLogo,
-    fourthLine,
-    thirdLine,
-    thirdLogo,
-    secondLine,
-    secondLogo,
     firstLogo,
     firstLine,
+    firstHandelSubmit,
+    secondLogo,
+    secondLine,
+    secondHandelSubmit,
+    thirdLogo,
+    thirdLine,
+    thirdHandelSubmit,
+    fourthLogo,
+    fourthLine,
+    fourthHandelSubmit,
   } = props;
 
-  
+  const renderImage = (source) => {
+    return <Image style={styles.frameChild} source={source} />;
+  };
+
   return (
-    <View
-      style={{
-        justifyContent: "space-around",
-        alignItems: "center",
-        margin: 5,
-      }}
-    >
-      <View
-        style={{
-          height: height * 0.15,
-          backgroundColor: "#fff",
-          borderRadius: 20,
-          width: width * 0.98,
-        }}
-      >
-        <Text
-          style={{
-            padding: 10,
-            color: "#2E436C",
-            fontWeight: "400",
-            fontSize: 16,
-            color: "#2E436C",
-          }}
-        >
-          Trending
-        </Text>
-
-        <View
-          style={{
-            flexDirection: "row",
-            textAlign: "center",
-            justifyContent: "space-around",
-            alignItems: "center",
-          }}
-        >
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Trending</Text>
+        <View style={styles.iconContainer}>
           <TouchableOpacity
-            style={{ alignItems: "center" }}
-            onPress={() => navigation.navigate("FindFunds")}
+            style={styles.iconWrapper}
+            onPress={firstHandelSubmit} // Corrected handlers
           >
-            <View>
-              <Image style={styles.frameChild} source={firstLogo} />
-            </View>
-            <Text style={{ padding: 0, color: "#2E436C" }}>{firstLine}</Text>
+            {renderImage(firstLogo)}
+            <Text style={styles.text}>{firstLine}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={{ alignItems: "center" }}
-            onPress={() => navigation.navigate("FindFunds")}
+            style={styles.iconWrapper}
+            onPress={secondHandelSubmit}
           >
-            <View>
-              <Image style={styles.frameChild} source={secondLogo} />
-            </View>
-            <Text style={{ marginTop: 0, color: "#2E436C" }}>{secondLine}</Text>
+            {renderImage(secondLogo)}
+            <Text style={styles.text}>{secondLine}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={{ alignItems: "center" }}
-            onPress={() => navigation.navigate("FindFunds")}
+            style={styles.iconWrapper}
+            onPress={thirdHandelSubmit}
           >
-            <View>
-              <Image style={styles.frameChild} source={thirdLogo} />
-            </View>
-            <Text style={{ marginTop: 0, color: "#2E436C" }}>{thirdLine}</Text>
+            {renderImage(thirdLogo)}
+            <Text style={styles.text}>{thirdLine}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={{ alignItems: "center" }}
-            onPress={() => navigation.navigate("FindFunds")}
+            style={styles.iconWrapper}
+            onPress={fourthHandelSubmit}
           >
-            <View>
-              <Image style={styles.frameChild} source={fourthLogo} />
-            </View>
-
-            <Text style={{ marginTop: 0, color: "#2E436C" }}>{fourthLine}</Text>
+            {renderImage(fourthLogo)}
+            <Text style={styles.text}>{fourthLine}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -115,16 +72,42 @@ const Trending = (props) => {
   );
 };
 
-
 const styles = StyleSheet.create({
-  frameChild: {
-    width: screenWidth * 0.12,
-    height: screenWidth * 0.12,
+  container: {
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginBottom: 5,
   },
+  card: {
+    height: height * 0.15,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    width: width * 0.98,
+    padding: 10,
 
-
-
+  },
+  title: {
+    color: "#2E436C",
+    fontWeight: "400",
+    fontSize: 16,
+  },
+  iconContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  iconWrapper: {
+    alignItems: "center",
+  },
+  frameChild: {
+    width: width * 0.12,
+    height: width * 0.12,
+  },
+  text: {
+    color: "#2E436C",
+    marginTop: 5,
+  },
 });
-
 
 export default Trending;

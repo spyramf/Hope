@@ -9,7 +9,9 @@ import {
   MemberCode,
 } from "./bseLogin";
 
-const sendPRequest = async () => {
+
+
+const sendPRequest = async ({ ucc, SchemeCode, OrderVal, TransNo }) => {
   try {
     // API 1
     const dataPass = `
@@ -63,10 +65,6 @@ const sendPRequest = async () => {
 
     console.log("Extracted value from getPassword:", parsedResponse);
 
-
-
-
-
     const dataSip = `
       <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:bses="http://bsestarmf.in/">
           <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
@@ -76,16 +74,16 @@ const sendPRequest = async () => {
           <soap:Body>
               <bses:orderEntryParam>
                   <bses:TransCode>NEW</bses:TransCode>
-                  <bses:TransNo>2022021812340000236</bses:TransNo>
+                  <bses:TransNo>${TransNo}</bses:TransNo>
                   <bses:OrderId/>
                   <bses:UserID>${UserId}</bses:UserID>
                   <bses:MemberId>${MemberCode}</bses:MemberId>
-                  <bses:ClientCode>7350015242</bses:ClientCode>
-                  <bses:SchemeCd>02-DP</bses:SchemeCd>
+                  <bses:ClientCode>${ucc}</bses:ClientCode>
+                  <bses:SchemeCd>${SchemeCode}</bses:SchemeCd>
                   <bses:BuySell>P</bses:BuySell>
                   <bses:BuySellType>FRESH</bses:BuySellType>
                   <bses:DPTxn>P</bses:DPTxn>
-                  <bses:OrderVal>500</bses:OrderVal>
+                  <bses:OrderVal>${OrderVal}</bses:OrderVal>
                   <bses:Qty/>
                   <bses:AllRedeem>N</bses:AllRedeem>
                   <bses:FolioNo/>
@@ -141,7 +139,8 @@ const sendPRequest = async () => {
               result["s:Envelope"]["s:Body"][0]["orderEntryParamResponse"][0][
                 "orderEntryParamResult"
               ][0];
-            resolve(getOrderEntryParamResult);
+               const extractedValue = getOrderEntryParamResult.split("|")[2];
+            resolve(extractedValue);
           } catch (error) {
             reject("Error extracting orderEntryParamResult: " + error);
           }

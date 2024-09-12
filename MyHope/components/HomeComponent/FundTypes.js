@@ -75,7 +75,6 @@ const FundTypes = (props) => {
             flexDirection: "column",
             textAlign: "center",
             justifyContent: "space-around",
-         
           }}
         >
           <View
@@ -84,12 +83,12 @@ const FundTypes = (props) => {
               textAlign: "center",
               justifyContent: "space-around",
               alignItems: "center",
-              marginBottom:40
+              marginBottom: 40,
             }}
           >
             <TouchableOpacity
               style={{ alignItems: "center" }}
-              onPress={() => navigation.navigate("MobileNo")}
+              onPress={() => navigation.navigate("SmallCap Funds")}
             >
               <View>
                 <Image style={styles.frameChild} source={firstLogo} />
@@ -97,7 +96,10 @@ const FundTypes = (props) => {
               <Text style={{ padding: 0, color: "#2E436C" }}>{firstLine}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ alignItems: "center" }}>
+            <TouchableOpacity
+              style={{ alignItems: "center" }}
+              onPress={() => navigation.navigate("Tax Saver Funds")}
+            >
               <View>
                 <Image style={styles.frameChild} source={secondLogo} />
               </View>
@@ -106,7 +108,10 @@ const FundTypes = (props) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ alignItems: "center" }}>
+            <TouchableOpacity
+              style={{ alignItems: "center" }}
+              onPress={() => navigation.navigate("LargeCap Funds")}
+            >
               <View>
                 <Image style={styles.frameChild} source={thirdLogo} />
               </View>
@@ -117,7 +122,7 @@ const FundTypes = (props) => {
 
             <TouchableOpacity
               style={{ alignItems: "center" }}
-              onPress={() => navigation.navigate("FindFunds")}
+              onPress={() => navigation.navigate("Gold Funds")}
             >
               <View>
                 <Image style={styles.frameChild} source={fourthLogo} />
@@ -139,7 +144,7 @@ const FundTypes = (props) => {
           >
             <TouchableOpacity
               style={{ alignItems: "center" }}
-              onPress={() => navigation.navigate("MobileNo")}
+              onPress={() => navigation.navigate("MidCap Funds")}
             >
               <View>
                 <Image style={styles.frameChild} source={firstLogos} />
@@ -147,7 +152,10 @@ const FundTypes = (props) => {
               <Text style={{ padding: 0, color: "#2E436C" }}>{firstLines}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ alignItems: "center" }}>
+            <TouchableOpacity
+              style={{ alignItems: "center" }}
+              onPress={() => navigation.navigate("Debt Funds")}
+            >
               <View>
                 <Image style={styles.frameChild} source={secondLogos} />
               </View>
@@ -156,7 +164,10 @@ const FundTypes = (props) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ alignItems: "center" }}>
+            <TouchableOpacity
+              style={{ alignItems: "center" }}
+              onPress={() => navigation.navigate("Thematic Funds")}
+            >
               <View>
                 <Image style={styles.frameChild} source={thirdLogos} />
               </View>
@@ -167,7 +178,7 @@ const FundTypes = (props) => {
 
             <TouchableOpacity
               style={{ alignItems: "center" }}
-              onPress={() => navigation.navigate("FindFunds")}
+              onPress={() => navigation.navigate("Hybrid Funds")}
             >
               <View>
                 <Image style={styles.frameChild} source={fourthLogos} />

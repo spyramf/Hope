@@ -9,74 +9,14 @@ const express = require("express");
 const app = express();
 const userRouter = require("./routes/user");
 const schemes = require("./models/schemes");
+const UccCreate = require("./models/uccCreate");
+
+
 
 app.use(express.json());
 
 app.use(userRouter);
 
-// /////////////////////////////////////////
-
-
-
-// const otpStore = {};
-
-// const transporter = nodemailer.createTransport({
-//   host: process.env.EMAIL_HOST,
-//   port: process.env.EMAIL_PORT,
-//   secure: false, // true for 465, false for other ports
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-// });
-
-// console.log(transporter);
-
-
-// app.post("/request-otp", (req, res) => {
-//   const { email } = req.body;
-
-
-
-// const emailid = process.env.EMAIL_USER;
-
-// console.log(emailid);
-
-//   if (!email) {
-//     return res.status(400).json({ message: "Email is required" });
-//   }
-
-//   // Generate a 6-digit OTP
-//   const otp = crypto.randomInt(100000, 999999).toString();
-
-// console.log(email)
-//   console.log(otp)
-//   // Store the OTP with a timestamp (in a real application, you'd store this in a database)
-//   otpStore[email] = { otp, timestamp: Date.now() };
-
-//   // Send the OTP via email
-//   const mailOptions = {
-//     from: process.env.EMAIL_USER,
-//     to: email,
-//     subject: "Your OTP Code",
-//     text: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
-//   };
-
-//   transporter.sendMail(mailOptions, (error, info) => {
-//     if (error) {
-//       return res
-//         .status(500)
-//         .json({ message: "Failed to send OTP", error: error.message });
-//     }
-//     res.status(200).json({ message: "OTP sent successfully" });
-//   });
-
-
-
-
-// });
-
-// //////////////////////////////////////////////////
 
 
 
@@ -85,9 +25,39 @@ app.use(userRouter);
 
 
 
+const generateSerialNumber = async () => {
+  // Find the last record in the database and get its serial number
+  const lastRecord = await UccCreate.findOne().sort({ _id: -1 });
+  let nextSerialNumber = "MB00000001"; // Default serial number
 
+  if (lastRecord && lastRecord.serialNumber) {
+    // Extract the numeric part, increment it, and pad with leading zeros
+    const lastNumber = parseInt(lastRecord.serialNumber.substring(2), 10);
+    nextSerialNumber = `MB${String(lastNumber + 1).padStart(8, "0")}`;
+  }
 
+  return nextSerialNumber;
+};
 
+app.post("/create-ucc", async (req, res) => {
+  try {
+    const serialNumber = await generateSerialNumber(); // Generate the serial number
+    const UCC = crypto.randomInt(1000000000, 9999999999).toString(); // Generate the UCC
+
+    // Create a new entry with the serial number and UCC
+    const data = new UccCreate({
+      serialNumber: serialNumber,
+      Ucc: UCC,
+      otherField: req.body.otherField, // Add any additional data from the request
+    });
+
+    const result = await data.save(); // Save to the database
+    res.send(result); // Send the result back to the client
+  } catch (error) {
+    console.error("Error saving data:", error);
+    res.status(500).send("An error occurred while saving the data.");
+  }
+});
 
 
 

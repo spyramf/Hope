@@ -13,128 +13,62 @@ import SIPDropdown from "../../components/Dropdown/SIPDropdown";
 import DatePicker from "../../components/MultiUseApp/DatePicker";
 import { Frequency } from "../../components/Dropdown/Dropdown data/DropdownData";
 import SelectOnBtn from "../../components/MultiUseApp/SelectOnBtn";
+const sendPRequest = require("../../api/PRServices");
+
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const validationSchema = Yup.object({});
+// Add validation schema for amount, datePick, and Frequency
+const validationSchema = Yup.object({
+  amount: Yup.number()
+    .required("Investment amount is required")
+    .min(1000, "Minimum amount is ₹1000"),
+});
 
 const PurchaseSIP = ({ route }) => {
   const navigation = useNavigation();
 
   const { setIsLoggedIn, profile } = useLogin();
-  const { selectedCountry, datePick } = useLogin();
+  const { selectedCountry, datePick, setDatePick, setSelectedCountry } =
+    useLogin();
 
-  const data = route.params.data;
-  console.log(data);
-  // setData(data);
+  const data = route.params?.data || {};
+  // console.log(data);
 
   const userInfo = {
     amount: "",
   };
 
-  const CreateSIP = async (amount) => {
-    const pan = amount;
-
-    console.log(pan);
-    const loginId = "5526901";
-    const memberCode = "55269";
-    const password = "Pass@12345";
-    const schemeCode = data.SchemeCode;
-    const clientCode = profile.user.mobile;
-    const intRefNo = "108799";
-    const transMode = "P";
-    const dpTransMode = "P";
-    const startDate = "02/08/2024";
-    const frequencyType = selectedCountry;
-    const frequencyAllowed = "1";
-    const instAmount = "1000";
-    const noOfInst = "150";
-    const remarks = "";
-    const folioNo = "123";
-    const firstOrderFlag = "Y";
-    const subBrCode = "";
-    const euin = "";
-    const euinFlag = "N";
-    const dpc = "Y";
-    const subBrokerArn = "ARN-225204";
-    const endDate = "";
-    const regnType = "XSIP";
-    const brokerage = "";
-    const mandateId = "865767";
-    const xsipType = "01";
-    const targetScheme = "";
-    const targetAmount = "";
-    const goalType = "";
-    const goalAmount = "";
-    const apiKey = "VmxST1UyRkhUbkpOVldNOQ==";
-
-    // Construct the data object using the variables
-    let data = JSON.stringify({
-      LoginId: loginId,
-      MemberCode: memberCode,
-      Password: password,
-      SchemeCode: schemeCode,
-      ClientCode: clientCode,
-      IntRefNo: intRefNo,
-      TransMode: transMode,
-      DPTransMode: dpTransMode,
-      StartDate: startDate,
-      FrequencyType: frequencyType,
-      FrequencyAllowed: frequencyAllowed,
-      InstAmount: instAmount,
-      NoOfInst: noOfInst,
-      Remarks: remarks,
-      FolioNo: folioNo,
-      FirstOrderFlag: firstOrderFlag,
-      SubBrCode: subBrCode,
-      EUIN: euin,
-      EUINFlag: euinFlag,
-      DPC: dpc,
-      SubBrokerARN: subBrokerArn,
-      EndDate: endDate,
-      RegnType: regnType,
-      Brokerage: brokerage,
-      MandateId: mandateId,
-      XSIPType: xsipType,
-      TargetScheme: targetScheme,
-      TargetAmount: targetAmount,
-      GoalType: goalType,
-      GoalAmount: goalAmount,
-      Filler1: "",
-      Filler2: "",
-      Filler3: "",
-      Filler4: "",
-      Filler5: "",
-      Filler6: "",
-      Filler7: "",
-      Filler8: "",
-      Filler9: "",
-      Filler10: "",
-    });
-
-    // Construct the config object using the variables
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: "https://bsestarmfdemo.bseindia.com/StarMFAPI/api/XSIP/XSIPRegistration",
-      headers: {
-        "Content-Type": "application/json",
-        APIKEY: apiKey,
-      },
-      data: data,
+  const CreateSIP = async (values, { setSubmitting, setErrors }) => {
+    const formData = {
+      amount: values.amount,
     };
+    console.log(formData);
+    const TransNo = Math.floor(
+      1000000000 + Math.random() * 9000000000
+    ).toString();
 
-    // Make the request using axios
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(JSON.stringify(response.data));
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const SchemeCode = data.SchemeCode;
+    const ucc = "IW50078199";
+    const OrderVal = formData.amount;
 
-    navigation.navigate("Order", { data });
+    const PResponse = await sendPRequest({
+      SchemeCode,
+      ucc,
+      OrderVal,
+      TransNo,
+    });
+    
+    const OrderNo = PResponse;
+
+
+    setDatePick("");
+    setSelectedCountry("");
+    setSubmitting(false);
+
+
+
+    navigation.navigate("Payment", { OrderVal, OrderNo });
   };
 
   return (
@@ -144,13 +78,16 @@ const PurchaseSIP = ({ route }) => {
           <Image
             style={styles.frameChild}
             source={{
-              uri: data.Logo,
+              uri: data.Logo || "default_logo_url",
             }}
           />
         </View>
 
-        <Text style={[styles.fundName]}>{data.SchemeName}</Text>
+        <Text style={[styles.fundName]}>
+          {data.SchemeName || "Scheme Name"}
+        </Text>
       </View>
+
       <View
         style={{
           flexDirection: "row",
@@ -164,50 +101,48 @@ const PurchaseSIP = ({ route }) => {
         />
 
         <SelectOnBtn
-          title=" Create SIP"
+          title=" Start SIP"
           handelSubmit={() => navigation.navigate("SIPAmount", { data })}
         />
       </View>
+
       <Formik
         initialValues={userInfo}
         validationSchema={validationSchema}
         onSubmit={CreateSIP}
       >
         {({
-          amount,
+          values,
           errors,
           touched,
           isSubmitting,
           handleChange,
           handleBlur,
           handleSubmit,
-        }) => {
-          {
-            /* const { amount } = values; */
-          }
-
-          return (
-            <>
-              <View style={{ flex: 1 }}>
-                <Inline
-                  leftHeading="Investment Amount"
-                  error={touched.password && errors.password}
-                  onBlur={handleBlur("amount")}
-                  placeholder="₹1000"
-                  autoCapitalize="none"
-                  onChangeText={amount}
-                  value={amount}
-                  setVa
-                />
-              </View>
-
-              <OnBtn
-                title="One Time"
-                handelSubmit={() => navigation.navigate("Payment")}
+          setErrors,
+        }) => (
+          <>
+            <View style={{ flex: 1 }}>
+              <Inline
+                leftHeading="Investment Amount"
+                onBlur={handleBlur("amount")}
+                placeholder="₹1000"
+                autoCapitalize="none"
+                onChangeText={handleChange("amount")}
+                value={values.amount}
               />
-            </>
-          );
-        }}
+              {touched.amount && errors.amount && (
+                <Text style={styles.errorText}>{errors.amount}</Text>
+              )}
+            </View>
+
+            <OnBtn
+              title="Create SIP"
+              handelSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+            />
+          </>
+        )}
       </Formik>
     </View>
   );
@@ -218,11 +153,10 @@ const styles = StyleSheet.create({
     width: screenWidth * 0.1,
     height: screenWidth * 0.1,
   },
-
   fundName: {
     fontSize: FontSize.size_5xl,
     width: "85%",
-    height: screenHeight * 0.03,
+    height: screenHeight * 0.08,
     fontWeight: "700",
     color: "#2E436C",
     textAlignVertical: "center",
@@ -231,13 +165,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Color.colorWhite,
     padding: Padding.p_3xs,
-
   },
-
   buttonrow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  errorText: {
+    color: "red",
+    fontSize: FontSize.size_sm,
+    marginTop: 5,
   },
 });
 

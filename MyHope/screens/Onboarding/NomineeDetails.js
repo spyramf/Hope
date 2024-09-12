@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+  Modal,
+  Text,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Inline from "../../components/MultiUseApp/InLine";
 import { Formik } from "formik";
@@ -12,29 +22,31 @@ import { Nominee } from "../../components/Dropdown/Dropdown data/DropdownData";
 import DatePicker from "../../components/MultiUseApp/DatePicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Validation Schema using Yup
 const validationSchema = Yup.object({
-  n_name: Yup.string().trim().min(3, "Invalid Name").required("Name required"),
-  n_pan: Yup.string().trim().min(9, "Invalid PAN"),
+  n_name: Yup.string()
+    .trim()
+    .min(3, "Name must be at least 3 characters")
+    .required("Nominee Name is required"),
+  n_pan: Yup.string()
+    .trim()
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Invalid PAN format")
+    .nullable(),
 });
 
 const NomineeDetails = () => {
-  const {
-    profile,
-    selectedCountry,
-    setSelectedCountry,
-    datePick,
-    setDatePick,
-  } = useLogin();
+  const { selectedCountry, setSelectedCountry, datePick, setDatePick } =
+    useLogin();
   const navigation = useNavigation();
-  const token = profile.token;
-const selectedNominee = selectedCountry;
   const [initialValues, setInitialValues] = useState({
     n_name: "",
     n_dob: "",
     n_pan: "",
-    n_relation: selectedNominee,
+    n_relation: selectedCountry,
   });
+  const [loading, setLoading] = useState(false); // Loading state
 
+  // Loading stored values from AsyncStorage
   useEffect(() => {
     const loadStoredValues = async () => {
       try {
@@ -47,53 +59,64 @@ const selectedNominee = selectedCountry;
           n_name: storedName || "",
           n_dob: storedDob || "",
           n_pan: storedPan || "",
-          n_relation: storedRelation || selectedNominee,
+          n_relation: storedRelation || selectedCountry,
         });
 
-     // update the selected relation
-        setDatePick(storedDob || ""); // update the date of birth
+        setDatePick(storedDob || "");
       } catch (error) {
-        console.log("Error loading stored values:", error);
+        console.error("Error loading stored values from AsyncStorage:", error);
+        Alert.alert(
+          "Error",
+          "Failed to load nominee details. Please try again."
+        );
       }
     };
 
     loadStoredValues();
-  }, []);
+  }, [selectedCountry]);
 
-  const signUp = async (values) => {
-    const n_name = values.n_name;
+  // Submitting form data
+  const handleSubmitForm = async (values) => {
+    const { n_name, n_pan } = values;
     const n_dob = datePick;
-    const n_pan = values.n_pan;
-    const n_relation = selectedNominee;
+    const n_relation = selectedCountry;
 
-    const data = { n_name, n_dob, n_pan, n_relation };
+    setLoading(true); // Start loading indicator
 
     try {
-      // Store nominee details in AsyncStorage
-      await AsyncStorage.setItem("n_name", n_name);
-      await AsyncStorage.setItem("n_dob", n_dob);
-      await AsyncStorage.setItem("n_pan", n_pan);
-      await AsyncStorage.setItem("n_relation", n_relation);
+      // Store nominee details locally
+      await AsyncStorage.multiSet([
+        ["n_name", n_name],
+        ["n_dob", n_dob],
+        ["n_pan", n_pan],
+        ["n_relation", n_relation],
+      ]);
 
-      // Send the data to the server
-      const res = await client.post(
+      // Send data to server
+      const response = await client.post(
         "/nominee-details",
-        { data },
+        { n_name, n_dob, n_pan, n_relation },
         {
           headers: {
-            Authorization: "JWT " + (await AsyncStorage.getItem("token")),
+            Authorization: `JWT ${await AsyncStorage.getItem("token")}`,
             "Content-Type": "application/json",
           },
         }
       );
 
-      console.log(res.data);
-
-      if (res.data.success) {
-        navigation.navigate("PoliticallyExposed");
+      if (response.data.success) {
+        navigation.navigate("LinkBankAccount");
+      } else {
+        Alert.alert("Error", "Failed to verify nominee. Please try again.");
       }
     } catch (error) {
-      console.log("Error:", error.message);
+      console.error("Submission Error:", error);
+      Alert.alert(
+        "Error",
+        "An error occurred while submitting nominee details."
+      );
+    } finally {
+      setLoading(false); // Stop loading indicator
     }
 
     setSelectedCountry("");
@@ -101,11 +124,19 @@ const selectedNominee = selectedCountry;
 
   return (
     <View style={styles.container}>
+      {/* Loading Modal */}
+      <Modal visible={loading} transparent animationType="fade">
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={styles.loadingText}>Verifying nominee details...</Text>
+        </View>
+      </Modal>
+
       <Formik
         initialValues={initialValues}
-        enableReinitialize={true} // Allows form to reinitialize with updated initial values
+        enableReinitialize
         validationSchema={validationSchema}
-        onSubmit={signUp}
+        onSubmit={handleSubmitForm}
       >
         {({
           values,
@@ -115,48 +146,54 @@ const selectedNominee = selectedCountry;
           handleBlur,
           handleSubmit,
         }) => {
-          const { n_name, n_pan } = values;
-
           return (
             <>
-              <View style={{ flex: 1 }}>
+              <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+              >
+                {/* Dropdown for Nominee Relation */}
                 <SIPDropdown
                   SIPdata={Nominee}
                   leftHeading="Select Nominee Relation"
                 />
 
-                <ScrollView>
-                  <View>
-                    <Inline
-                      leftHeading="Enter Nominee Name"
-                      error={touched.n_name && errors.n_name}
-                      onBlur={handleBlur("n_name")}
-                      placeholder="Enter Nominee Name"
-                      autoCapitalize="words"
-                      onChangeText={handleChange("n_name")}
-                      value={n_name}
-                    />
-
-                    <DatePicker
-                      leftHeading="Select Date Of Birth"
-                      placeholder="Select Date Of Birth"
-                      value={datePick}
-                    />
-
-                    <Inline
-                      leftHeading="PAN Number (Optional)"
-                      error={touched.n_pan && errors.n_pan}
-                      onBlur={handleBlur("n_pan")}
-                      placeholder="PAN Number"
-                      autoCapitalize="characters"
-                      maxLength={10}
-                      onChangeText={handleChange("n_pan")}
-                      value={n_pan}
-                    />
-                  </View>
+                {/* Form Fields */}
+                <ScrollView style={styles.formContainer}>
+                  <Inline
+                    leftHeading="Enter Nominee Name"
+                    error={touched.n_name && errors.n_name}
+                    onBlur={handleBlur("n_name")}
+                    placeholder="Enter Nominee Name"
+                    autoCapitalize="words"
+                    onChangeText={handleChange("n_name")}
+                    value={values.n_name}
+                  />
+                  <DatePicker
+                    leftHeading="Select Date Of Birth"
+                    placeholder="Select Date Of Birth"
+                    value={datePick}
+                    onChange={(date) => setDatePick(date)}
+                  />
+                  <Inline
+                    leftHeading="PAN Number (Optional)"
+                    error={touched.n_pan && errors.n_pan}
+                    onBlur={handleBlur("n_pan")}
+                    placeholder="PAN Number"
+                    autoCapitalize="characters"
+                    maxLength={10}
+                    onChangeText={handleChange("n_pan")}
+                    value={values.n_pan}
+                  />
                 </ScrollView>
-              </View>
-              <OnBtn title="Verify Nominee" handelSubmit={handleSubmit} />
+              </KeyboardAvoidingView>
+
+              {/* Button for Submitting */}
+              {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+              ) : (
+                <OnBtn title="Verify Nominee" handelSubmit={handleSubmit} />
+              )}
             </>
           );
         }}
@@ -169,8 +206,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 10,
-    paddingTop: 32,
+    padding: 16,
+  },
+  formContainer: {
+    flex: 1,
+    paddingBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  loadingText: {
+    color: "#fff",
+    marginTop: 10,
+    fontSize: 16,
   },
 });
 

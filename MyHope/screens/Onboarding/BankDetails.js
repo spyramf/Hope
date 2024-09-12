@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+  Text,
+  SafeAreaView,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Inline from "../../components/MultiUseApp/InLine";
 import { Formik } from "formik";
@@ -14,20 +22,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const validationSchema = Yup.object({
   ifsc: Yup.string()
     .trim()
-    .min(3, "Invalid IFSC Code")
+    .length(11, "Invalid IFSC Code")
     .required("IFSC Code required"),
   accNo: Yup.string()
     .trim()
-    .min(3, "Invalid Account Number")
+    .min(9, "Invalid Account Number")
     .required("Account Number required"),
-  bankName: Yup.string().trim().required("Bank Name Required"),
+  bankName: Yup.string().trim().required("Bank Name required"),
 });
 
 const BankDetails = () => {
   const navigation = useNavigation();
-  const { selectedCountry, setSelectedCountry } = useLogin();
-  const { profile, pass, setProfile } = useLogin();
-  const token = profile.token;
+  const { selectedCountry, setSelectedCountry, setProfile, country } =
+    useLogin();
 
   const [initialValues, setInitialValues] = useState({
     ifsc: "",
@@ -35,6 +42,7 @@ const BankDetails = () => {
     bankName: "",
     accType: selectedCountry,
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loadStoredValues = async () => {
@@ -51,9 +59,10 @@ const BankDetails = () => {
           accType: storedAccType || selectedCountry,
         });
 
-        setSelectedCountry(storedAccType || selectedCountry); // update selected account type
+        setSelectedCountry(storedAccType || selectedCountry);
       } catch (error) {
-        console.log("Error loading stored values:", error);
+        Alert.alert("Error", "Failed to load saved data.");
+        console.error("Error loading stored values:", error);
       }
     };
 
@@ -61,70 +70,94 @@ const BankDetails = () => {
   }, []);
 
   const signUp = async (values) => {
-    const ifsc = values.ifsc;
-    const accType = selectedCountry;
-    const bankName = values.bankName;
-    const accNo = values.accNo;
-
-    const data = { accNo, bankName, accType, ifsc };
-
+    setLoading(true);
     try {
-      // Store bank details in AsyncStorage
-      await AsyncStorage.setItem("ifsc", ifsc);
-      await AsyncStorage.setItem("accNo", accNo);
-      await AsyncStorage.setItem("bankName", bankName);
-      await AsyncStorage.setItem("accType", accType);
+      const { ifsc, accNo, bankName } = values;
+      const accType = country;
 
-      // Send the data to the server
-      const res = await client.post(
-        "/bank-details",
-        { data },
+      await AsyncStorage.multiSet([
+        ["ifsc", ifsc],
+        ["accNo", accNo],
+        ["bankName", bankName],
+        ["accType", accType],
+      ]);
+
+      const result = await client.post("/create-ucc");
+      const ucc = result.data.serialNumber;
+      await AsyncStorage.setItem("ucc", ucc);
+
+      const myResult = await client.post(
+        "/ucc-details",
+        { ucc },
         {
           headers: {
-            Authorization: "JWT " + token,
+            Authorization: "JWT " + (await AsyncStorage.getItem("token")),
             "Content-Type": "application/json",
           },
         }
       );
 
-      const result = await client.post("/sign-in", { ...pass });
-      setProfile(result.data);
-      navigation.navigate("ProcessCompleted");
+      const res = await client.post(
+        "/bank-details",
+        { ifsc, accNo, bankName, accType },
+        {
+          headers: {
+            Authorization: "JWT " + (await AsyncStorage.getItem("token")),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (res.data.success) {
+        const email = await AsyncStorage.getItem("email");
+        const password = await AsyncStorage.getItem("password");
+
+        const loginRes = await client.post("/sign-in", { email, password });
+        if (loginRes.data.success) {
+          setProfile(loginRes.data);
+          await AsyncStorage.setItem(
+            "LoginData",
+            JSON.stringify(loginRes.data)
+          );
+          navigation.navigate("ProcessCompleted");
+        }
+      }
     } catch (error) {
-      console.log("Error:", error.message);
+      Alert.alert("Error", "Failed to submit bank details.");
+      console.error("Error:", error.message);
+    } finally {
+      setLoading(false);
     }
 
     setSelectedCountry("");
   };
 
   return (
-    <View style={styles.container}>
-      <Formik
-        initialValues={initialValues}
-        enableReinitialize={true} // Allows form to reinitialize with updated initial values
-        validationSchema={validationSchema}
-        onSubmit={signUp}
-      >
-        {({
-          values,
-          errors,
-          touched,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-        }) => {
-          const { ifsc, accNo, bankName } = values;
-
-          return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Formik
+          initialValues={initialValues}
+          enableReinitialize={true}
+          validationSchema={validationSchema}
+          onSubmit={signUp}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+          }) => (
             <>
-              <View style={{ flex: 1 }}>
+              <View style={styles.formContainer}>
                 <SIPDropdown
                   SIPdata={Account}
                   leftHeading="Select Account Type"
                 />
 
                 <ScrollView>
-                  <View>
+                  <View style={styles.inputGroup}>
                     <Inline
                       leftHeading="Enter IFSC Code"
                       error={touched.ifsc && errors.ifsc}
@@ -132,7 +165,7 @@ const BankDetails = () => {
                       placeholder="Enter IFSC Code"
                       autoCapitalize="characters"
                       onChangeText={handleChange("ifsc")}
-                      value={ifsc}
+                      value={values.ifsc}
                     />
 
                     <Inline
@@ -142,7 +175,7 @@ const BankDetails = () => {
                       placeholder="Bank Name"
                       autoCapitalize="words"
                       onChangeText={handleChange("bankName")}
-                      value={bankName}
+                      value={values.bankName}
                     />
 
                     <Inline
@@ -153,26 +186,40 @@ const BankDetails = () => {
                       autoCapitalize="none"
                       keyboardType="number-pad"
                       onChangeText={handleChange("accNo")}
-                      value={accNo}
+                      value={values.accNo}
                     />
                   </View>
                 </ScrollView>
               </View>
-              <OnBtn title="Verify Bank" handelSubmit={handleSubmit} />
+              {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+              ) : (
+                <OnBtn title="Verify Bank" handelSubmit={handleSubmit} />
+              )}
             </>
-          );
-        }}
-      </Formik>
-    </View>
+          )}
+        </Formik>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F9F9F9",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 10,
-    paddingTop: 32,
+    padding: 16,
+    backgroundColor: "#FFFFFF",
+  },
+  formContainer: {
+    flex: 1,
+    marginTop: 10,
+  },
+  inputGroup: {
+    marginBottom: 20,
   },
 });
 

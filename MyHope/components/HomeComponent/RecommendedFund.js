@@ -6,6 +6,7 @@ import {
   Image,
   Dimensions,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FontSize, Padding, Color, Border } from "../../GlobalStyles";
@@ -19,16 +20,25 @@ const { width } = Dimensions.get("window");
 const RecommendedFund = (props) => {
   const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const { fundName, fundSubType, fundType, oneYear, data, logo } = props;
+   const [loading, setLoading] = useState(false);
 
+  const { fundName, fundSubType, fundType, oneYear, data, logo } = props;
+  const handlePress = async () => {
+    try {
+      setLoading(true);
+      navigation.navigate("SIPAmount",data);
+    } catch (error) {
+      console.error("Navigation error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   console.log(currentIndex)
   const renderItem = (data) => (
     <View key={data.fundName} style={styles.cardContainer}>
-      <Pressable
-        onPress={() => navigation.navigate("SIPAmount")}
-      >
+      <Pressable onPress={handlePress}>
         <View style={styles.box_size}>
           <View>
             <View>
@@ -95,6 +105,9 @@ const RecommendedFund = (props) => {
           </View>
         </View>
       </Pressable>
+      {loading && (
+        <ActivityIndicator size="large" color={Color.colorMediumseagreen_100} />
+      )}
     </View>
   );
 
@@ -115,11 +128,11 @@ const RecommendedFund = (props) => {
 const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
-    width:"100%"
+    width: "100%",
   },
 
   cardContainer: {
-    alignItems: "center",
+  
     justifyContent: "center",
     width,
   },
@@ -215,16 +228,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-
-
   box_size: {
     borderWidth: 0,
     borderColor: Color.colorSteelblue_100,
-    width:"100%",
+    width: "98%",
     borderRadius: 20,
     paddingVertical: Padding.p_10xs,
     backgroundColor: Color.colorWhite,
     paddingHorizontal: Padding.p_11xs,
+    backgroundColor: "#fff",
+
   },
 
   frameItem: {
@@ -239,7 +252,5 @@ const styles = StyleSheet.create({
   frameContainer: {
     alignItems: "center",
   },
-
-  
 });
 export default RecommendedFund;

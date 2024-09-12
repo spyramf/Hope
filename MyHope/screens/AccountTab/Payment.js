@@ -1,24 +1,32 @@
 import * as React from "react";
-import { Text, StyleSheet, View, Dimensions, TouchableOpacity } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, Border, FontSize } from "../../GlobalStyles";
 import { useState } from "react";
 import DirectPay from "../../components/MultiUseApp/DirectPay";
-
-
+const sendUPIApiRequest = require("../../api/UPIApi");
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-
-
-
-
-
-const Payment = () => {
+const Payment = ({ route }) => {
   const navigation = useNavigation();
 
   const [selectedRadio, setSetectedRadio] = useState(1);
+
+  const OrderNo = route.params?.OrderNo || {};
+
+  const OrderVal = route.params?.OrderVal || {};
+
+  console.log(OrderNo);
+
+  console.log(OrderVal);
 
   const skills = [
     {
@@ -73,6 +81,36 @@ const Payment = () => {
     },
   ];
 
+  const handleDirectPay = async (id) => {
+    switch (id) {
+      case 1:
+        console.log("Phone Pe selected");
+        // navigation logic or payment handling for Phone Pe
+        navigation.navigate("Payment", { OrderNo, OrderVal });
+        break;
+      case 2:
+        console.log("Google Pay selected");
+        // navigation logic or payment handling for Google Pay
+        navigation.navigate("Payment", { OrderNo, OrderVal });
+        break;
+      case 3:
+        console.log("UPI selected");
+
+        const UpiResponse = await sendUPIApiRequest();
+console.log(UpiResponse);
+        // navigation logic or payment handling for UPI
+        navigation.navigate("Payment");
+        break;
+      case 4:
+        console.log("Debit Card/Net Banking selected");
+        // navigation logic or payment handling for Debit Card/Net Banking
+        navigation.navigate("Payment", { OrderNo, OrderVal });
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text
@@ -96,7 +134,11 @@ const Payment = () => {
               <Text style={styles.phonepe}> {item.name} </Text>
             </View>
 
-            <View>{selectedRadio === item.id ? <DirectPay /> : null}</View>
+            <View>
+              {selectedRadio === item.id ? (
+                <DirectPay handlePay={() => handleDirectPay(item.id)} />
+              ) : null}
+            </View>
           </View>
         </TouchableOpacity>
       ))}
