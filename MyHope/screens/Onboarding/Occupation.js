@@ -3,61 +3,91 @@ import React from "react";
 import SelectOnBtn from "../../components/MultiUseApp/SelectOnBtn";
 import MainHeader from "../../components/MultiUseApp/MainHeader";
 import { useNavigation } from "@react-navigation/native";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import client from "../../api/client";
 const { height: screenHeight } = Dimensions.get("window");
 
 const Occupation = () => {
   const navigation = useNavigation();
+
+  const handleTaxStatusSelection = async (occupation) => {
+    try {
+      await AsyncStorage.setItem("occupation", occupation);
+
+    const userValues = {
+      occupation,
+      gender: await AsyncStorage.getItem("gender"),
+      taxStatus: await AsyncStorage.getItem("taxStatus"),
+    };
+
+    console.log(userValues);
+      const res = await client.post("/annual-income", userValues, {
+        headers: {
+          Authorization: "JWT " + (await AsyncStorage.getItem("token")),
+          "Content-Type": "application/json",
+        },
+
+        data: userValues,
+      });
+
+      navigation.navigate("PersonalDetails");
+    } catch (error) {
+      console.error("Error storing tax status:", error);
+      Alert.alert("Error", "Failed to select tax status. Please try again.");
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* <MainHeader header=" Your Occupation" back="MobileNo" /> */}
+      <Text style={styles.SubPageTitle}>Select one of the options</Text>
 
-      <View>
-        <Text style={styles.SubPageTitle}>Select one of the option</Text>
-      </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={styles.row}>
         <SelectOnBtn
           title="Business"
-          handelSubmit={() => navigation.navigate("NomineeDetails")}
+          handelSubmit={() => handleTaxStatusSelection("01")}
         />
         <SelectOnBtn
-          title="Private Sector"
-          handelSubmit={() => navigation.navigate("NomineeDetails")}
+          title="Professional"
+          handelSubmit={() => handleTaxStatusSelection("02")}
         />
       </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+
+      <View style={styles.row}>
         <SelectOnBtn
-          title="Farmer"
-          handelSubmit={() => navigation.navigate("NomineeDetails")}
+          title="Agriculture"
+          handelSubmit={() => handleTaxStatusSelection("04")}
         />
         <SelectOnBtn
-          title="Gov Sector"
-          handelSubmit={() => navigation.navigate("NomineeDetails")}
-        />
-      </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <SelectOnBtn
-          title="Public Sector"
-          handelSubmit={() => navigation.navigate("NomineeDetails")}
-        />
-        <SelectOnBtn
-          title="Retired"
-          handelSubmit={() => navigation.navigate("NomineeDetails")}
+          title="Services"
+          handelSubmit={() => handleTaxStatusSelection("04")}
         />
       </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+
+      <View style={styles.row}>
+        <SelectOnBtn
+          title="Housewife"
+          handelSubmit={() => handleTaxStatusSelection("03")}
+        />
         <SelectOnBtn
           title="Student"
-          handelSubmit={() => navigation.navigate("NomineeDetails")}
+          handelSubmit={() => handleTaxStatusSelection("10")}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <SelectOnBtn
+          title="Retired"
+          handelSubmit={() => handleTaxStatusSelection("03")}
         />
         <SelectOnBtn
-          title="Other"
-          handelSubmit={() => navigation.navigate("NomineeDetails")}
+          title="Others"
+          handelSubmit={() => handleTaxStatusSelection("10")}
         />
       </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -65,7 +95,6 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingTop: 32,
   },
-
   SubPageTitle: {
     fontSize: 16,
     color: "#2e436c",
@@ -74,5 +103,11 @@ const styles = StyleSheet.create({
     marginTop: screenHeight * 0.03,
     marginBottom: screenHeight * 0.01,
   },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
 });
+
 export default Occupation;

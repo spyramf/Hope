@@ -19,12 +19,12 @@ const DatePicker = (props) => {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const { leftHeading, placeholder, error } = props;
 
-  const { setDatePick } = useLogin();
+  const { datePick,setDatePick } = useLogin();
 
   const toggleDatepicker = () => {
     setShowPicker(!showPicker);
   };
-
+console.log(datePick)
   const onChange = ({ type }, selectedDate) => {
     if (type == "set") {
       const currentDate = selectedDate || date;

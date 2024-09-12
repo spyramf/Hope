@@ -1,97 +1,88 @@
-import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import React, { useState } from "react";
 import OnBtn from "../../components/MultiUseApp/OnBtn";
-import client from "../../api/client";
-import axios from "axios";
 import { useNavigation, StackActions } from "@react-navigation/native";
-const { height: height } = Dimensions.get("window");
-const { width: width } = Dimensions.get("window");
 import { useLogin } from "../../contexts/LoginProvider";
+const sendUccRequest = require("../../api/uccService");
+const sendXManRequest = require("../../api/MandateServices");
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const { height, width } = Dimensions.get("window");
+
 const ProcessCompleted = () => {
+  const [loading, setLoading] = useState(false); // For loading indicator
   const navigation = useNavigation();
-  const { setIsLoggedIn, profile, selectedCountry, setSelectedCountry } =
-    useLogin();
+  const { setIsLoggedIn } = useLogin();
 
-  const bot = profile.user.dob;
+  const signUp = async () => {
+    setLoading(true);
+    try {
+      const UccRequest = await sendUccRequest();
+       console.log(UccRequest);
 
-  console.log(bot);
-  const UCCGen = async () => {
-    const url =
-      "https://bsestarmfdemo.bseindia.com/BSEMFWEBAPI/api/ClientRegistration/Registration";
+      const Log = await AsyncStorage.getItem("LoginData");
+      if (!Log) throw new Error("Login data not found.");
 
-    const headers = {
-      "Content-Type": "application/json",
-      APIKEY: "VmxST1UyRkhUbkpOVldNOQ==", // Add your API key here
-      // Add any other headers as needed
-    };
+      const parsedLog = JSON.parse(Log);
+      const dob = parsedLog.user.dob;
+      // console.log(dob);
 
-    // Define your variables
-    const userId = "5526901";
-    const memberCode = "55269";
-    const password = "Pass@12345";
-    const regnType = "NEW";
-    const regnId = profile.user.mobile;
-    const firstName = profile.user.firstName;
-    const middleName = "Hari";
-    const lastName = profile.user.lastName;
-    const gender = profile.user.gender;
-    const dob = profile.user.dob;
-    const pan = profile.user.pan;
-    const accountType = profile.user.accType;
-    const accountNumber = profile.user.accNo;
-    const ifsc = profile.user.ifsc;
-    const fullName = `${firstName} ${lastName}`;
-    const addressLine1 = profile.user.add;
-    const addressLine2 = "ADD2";
-    const addressLine3 = "ADD3";
-    const city = profile.user.city;
-    const state = profile.user.state;
-    const postalCode = profile.user.pin;
-    const country = "INDIA";
-    const mobile = profile.user.mobile;
-    const email = profile.user.email;
-    const fatherName = profile.user.n_name;
-    const relationship = profile.user.father;
-    const occupation = "100";
+      const [day, month, year] = dob.split("/");
+      const formattedDob = `${month}/${day}/${year}`;
 
-    const param = `${regnId}|${firstName}|${middleName}|${lastName}|01|${gender}|${dob}|01|SI|||||||||||||N||||${pan}||||||||P||||||||${accountType}|${accountNumber}||${ifsc}|Y|||||||||||||||||||||${fullName}|01|${addressLine1}|${addressLine2}|${addressLine3}|${city}|${state}|${postalCode}|${country}|${mobile}||||${email}|M||||||||||||${mobile}|${fatherName}|${relationship}|${occupation}|N|||||||||||||||E||||||||||||Y||Z|||SE|SE|Y|O||||||||||||||`;
+      console.log("Formatted DOB:", formattedDob);
+      let occupation = parsedLog.user.occupation;
+      console.log(occupation);
+      const occupationCode = parsedLog.user.occupation;
+      if (occupation === "01") {
+        occupation = "B";
+      } else {
+        occupation = "S";
+      }
 
-    const data = {
-      UserId: userId,
-      MemberCode: memberCode,
-      Password: password,
-      RegnType: regnType,
-      Param: param,
-      Filler2: "",
-    };
+      console.log("Updated Occupation:", occupation);
 
-    axios
-      .post(url, data, { headers })
-      .then((response) => {
-        console.warn(response.data.Remarks);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      const param = `${parsedLog.user.pan}||${parsedLog.user.firstName}|${formattedDob}|||${parsedLog.user.taxStatus}|P|1|${parsedLog.user.city}|IN|IN|${parsedLog.user.pan}|C||||||||||01||32|||N|${occupationCode}|${occupation}|||||||||||B|N||||||||||||||||||||||||||N|N||N|||`;
 
-    navigation.dispatch(StackActions.replace("Home"));
-    setIsLoggedIn(true);
+      const Flag = "01";
+      const FatRequest = await sendXManRequest({ Flag, param });
+      console.log(FatRequest);
+
+      // Navigate to a new stack screen without going back to previous screens
+      navigation.navigate("Home");
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error("Failed to complete the process:", error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <View style={{}}>
+      <View style={styles.imageContainer}>
         <Image
           source={require("../../screens/AppImage/Completed.png")}
-          style={{
-            alignItem: "center",
-            width: width * 1,
-            height: height * 0.7,
-          }}
+          style={styles.image}
+          accessibilityLabel="Process Completed Image"
         />
       </View>
-      <View style={{ top: height * 0.05 }}>
-        <OnBtn title="Process Completed" handelSubmit={UCCGen} />
+
+      <View style={styles.buttonContainer}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <OnBtn title="Process Completed" handelSubmit={signUp} />
+        )}
       </View>
     </View>
   );
@@ -101,8 +92,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 10,
-    paddingTop: 32,
+    justifyContent: "center", // Center everything
+    alignItems: "center", // Center horizontally
+    padding: 16,
+  },
+  imageContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 0.7, // 70% of the screen height
+  },
+  image: {
+    width: width * 0.9, // 90% of screen width
+    height: height * 0.5, // 50% of screen height
+    resizeMode: "contain",
+  },
+  buttonContainer: {
+    marginTop: 20,
+    width: width * 0.8, // 80% of screen width
   },
 });
 

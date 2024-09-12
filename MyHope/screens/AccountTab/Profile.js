@@ -1,181 +1,179 @@
-import { View, Text, StyleSheet } from "react-native";
-import React from "react";
+import { View, Text, StyleSheet, Alert } from "react-native";
+import React, { useEffect } from "react";
 import UnEditAble from "../../components/AccountComponent/UnEditAble";
 import { useLogin } from "../../contexts/LoginProvider";
 import { ScrollView } from "react-native-gesture-handler";
 import UnEditInLine from "../../components/AccountComponent/UnEditInLine";
+
 const Profile = () => {
-  const { setIsLoggedIn, profile } = useLogin();
+  const { profile } = useLogin();
+
+  useEffect(() => {
+    if (!profile || !profile.user) {
+      Alert.alert("Error", "User profile data is missing.");
+    }
+  }, [profile]);
+
+  const renderSection = (title, children) => (
+    <>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {children}
+      <View style={styles.sectionDivider} />
+    </>
+  );
+
+  const renderRow = (left, right) => (
+    <View style={styles.row}>
+      {left}
+      {right}
+    </View>
+  );
+
+  if (!profile || !profile.user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Unable to load profile data.</Text>
+      </View>
+    );
+  }
+
+  const {
+    firstName,
+    lastName,
+    mobile,
+    state,
+    city,
+    pin,
+    email,
+    pan,
+    dob,
+    ifsc,
+    accType,
+    bankName,
+    accNo,
+    n_name,
+    n_relation,
+  } = profile.user;
+
   return (
     <View style={styles.container}>
       <ScrollView>
-        <View>
-          <Text
-            style={{
-              fontSize: 20,
-              margin: 10,
-              marginTop: 30,
-              fontWeight: "700",
-              color: "#2E436C",
-            }}
-          >
-            Personal Details
-          </Text>
-
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <UnEditAble
-              leftHeading="First Name"
-              rightHeading={profile.user.firstName}
+        {renderSection(
+          "Personal Details",
+          <>
+            {renderRow(
+              <UnEditAble
+                leftHeading="First Name"
+                rightHeading={firstName || "N/A"}
+              />,
+              <UnEditAble
+                leftHeading="Last Name"
+                rightHeading={lastName || "N/A"}
+              />
+            )}
+            {renderRow(
+              <UnEditAble
+                leftHeading="Mobile Number"
+                rightHeading={mobile || "N/A"}
+              />,
+              <UnEditAble leftHeading="State" rightHeading={state || "N/A"} />
+            )}
+            {renderRow(
+              <UnEditAble leftHeading="City" rightHeading={city || "N/A"} />,
+              <UnEditAble leftHeading="PIN" rightHeading={pin || "N/A"} />
+            )}
+            <UnEditInLine
+              leftHeading="Email ID"
+              rightHeading={email || "N/A"}
             />
-            <UnEditAble
-              leftHeading="Last Name"
-              rightHeading={profile.user.lastName}
-            />
-          </View>
+          </>
+        )}
 
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <UnEditAble
-              leftHeading="Mobile Number"
-              rightHeading={profile.user.mobile}
-            />
-            <UnEditAble leftHeading="State" rightHeading={profile.user.state} />
-          </View>
-
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <UnEditAble leftHeading="City" rightHeading={profile.user.city} />
-            <UnEditAble leftHeading="PIN" rightHeading={profile.user.pin} />
-          </View>
-
-          <UnEditInLine
-            leftHeading="Email ID"
-            rightHeading={profile.user.email}
-          />
-
-          <View
-            style={{
-              borderBottomColor: "black",
-              borderBottomWidth: 0.5,
-              borderStyle: "dashed",
-              marginTop: 20,
-            }}
-          />
-
-          <Text
-            style={{
-              fontSize: 20,
-              margin: 10,
-              marginTop: 20,
-              fontWeight: "700",
-              color: "#2E436C",
-            }}
-          >
-            KYC Details
-          </Text>
-
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <UnEditAble leftHeading="PAN" rightHeading={profile.user.pan} />
+        {renderSection(
+          "KYC Details",
+          renderRow(
+            <UnEditAble leftHeading="PAN" rightHeading={pan || "N/A"} />,
             <UnEditAble
               leftHeading="Date of Birth"
-              rightHeading={profile.user.dob}
+              rightHeading={dob || "N/A"}
             />
-          </View>
+          )
+        )}
 
-          <View
-            style={{
-              borderBottomColor: "black",
-              borderBottomWidth: 0.5,
-              borderStyle: "dashed",
-              marginTop: 20,
-            }}
-          />
-
-          <Text
-            style={{
-              fontSize: 20,
-              margin: 10,
-              marginTop: 20,
-              fontWeight: "700",
-              color: "#2E436C",
-            }}
-          >
-            Bank Details
-          </Text>
-
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <UnEditAble
-              leftHeading="IFSC Code"
-              rightHeading={profile.user.ifsc}
+        {renderSection(
+          "Bank Details",
+          <>
+            {renderRow(
+              <UnEditAble
+                leftHeading="IFSC Code"
+                rightHeading={ifsc || "N/A"}
+              />,
+              <UnEditAble
+                leftHeading="Account Type"
+                rightHeading={accType || "N/A"}
+              />
+            )}
+            <UnEditInLine
+              leftHeading="Bank Name"
+              rightHeading={bankName || "N/A"}
             />
-            <UnEditAble
-              leftHeading="Account Type"
-              rightHeading={profile.user.accType}
+            <UnEditInLine
+              leftHeading="Account Number"
+              rightHeading={accNo || "N/A"}
             />
-          </View>
+          </>
+        )}
 
-          <UnEditInLine
-            leftHeading="Bank Name"
-            rightHeading={profile.user.bankName}
-          />
-
-          <UnEditInLine
-            leftHeading="Account Number"
-            rightHeading={profile.user.accNo}
-          />
-
-          <View
-            style={{
-              borderBottomColor: "black",
-              borderBottomWidth: 0.5,
-              borderStyle: "dashed",
-              marginTop: 20,
-            }}
-          />
-
-          <Text
-            style={{
-              fontSize: 20,
-              margin: 10,
-              marginTop: 20,
-              fontWeight: "700",
-              color: "#2E436C",
-            }}
-          >
-            Nominee Details
-          </Text>
-
-          <UnEditInLine
-            leftHeading="Nominee Name"
-            rightHeading={profile.user.n_name}
-          />
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <UnEditAble
-              leftHeading="Nominee Relation"
-              rightHeading={profile.user.n_relation}
+        {renderSection(
+          "Nominee Details",
+          <>
+            <UnEditInLine
+              leftHeading="Nominee Name"
+              rightHeading={n_name || "N/A"}
             />
-            <UnEditAble leftHeading="Percentage" rightHeading="100%" />
-          </View>
-        </View>
+            {renderRow(
+              <UnEditAble
+                leftHeading="Nominee Relation"
+                rightHeading={n_relation || "N/A"}
+              />,
+              <UnEditAble leftHeading="Percentage" rightHeading="100%" />
+            )}
+          </>
+        )}
       </ScrollView>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    bottom:10
+    bottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    margin: 10,
+    marginTop: 20,
+    fontWeight: "700",
+    color: "#2E436C",
+  },
+  sectionDivider: {
+    borderBottomColor: "black",
+    borderBottomWidth: 0.5,
+    borderStyle: "dashed",
+    marginTop: 20,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  errorText: {
+    fontSize: 18,
+    color: "red",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
+
 export default Profile;

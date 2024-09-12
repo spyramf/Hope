@@ -46,6 +46,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 5,
+    borderRadius: 20,
   },
   cardContainer: {
     alignItems: "center",
@@ -53,7 +55,7 @@ const styles = StyleSheet.create({
     width,
   },
   cardWrapper: {
- borderRadius: 20,
+    borderRadius: 20,
     overflow: "hidden",
   },
   card: {

@@ -6,8 +6,16 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 const { width } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
-const HomeHeader = () => {
+const HomeHeader = ({Name,City}) => {
   const navigation = useNavigation();
+
+
+
+
+
+
+
+
 
   return (
     <View style={styles.container}>
@@ -57,7 +65,7 @@ const HomeHeader = () => {
                   fontWeight: "600",
                 }}
               >
-                Pradeep Gangurde
+               {Name}
               </Text>
               <Text
                 style={{
@@ -65,7 +73,7 @@ const HomeHeader = () => {
                   fontSize: 12,
                 }}
               >
-                Nashik
+                {City}
               </Text>
             </View>
           </View>

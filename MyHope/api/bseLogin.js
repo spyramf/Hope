@@ -7,3 +7,4 @@ export const UccUrl ="https://www.bsestarmf.in/BSEMFWEBAPI/api/ClientRegistratio
 export const XSipPassUrl = "http://bsestarmf.in/MFOrderEntry/getPassword";
 export const XSipOrderUrl = "https://www.bsestarmf.in/MFOrderEntry/MFOrder.svc/Secure";
 export const ManFatPassUrl = "https://www.bsestarmf.in/StarMFWebService/StarMFWebService.svc/Secure";
+export const DirectPayUrl = "https://www.bsestarmf.in/StarMFSinglePaymentAPI/Single/Payment";

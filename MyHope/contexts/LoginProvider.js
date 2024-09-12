@@ -8,6 +8,7 @@ const LoginProvider = ({ children }) => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [datePick, setDatePick] = useState("");
   const [pass, setPass] = useState("");
+  const [country, setCountry] = useState("");
   return (
     <LoginContext.Provider
       value={{
@@ -21,6 +22,8 @@ const LoginProvider = ({ children }) => {
         setDatePick,
         pass,
         setPass,
+        country,
+        setCountry,
       }}
     >
       {children}

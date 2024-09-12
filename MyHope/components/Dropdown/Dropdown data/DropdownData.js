@@ -241,21 +241,15 @@ export const countriesName = [
   { country: "Zimbabwe", code: "263", iso: "ZW" },
 ];
 
-
 export const SIPdata = [
   { country: "Daily", code: "93", iso: "AF" },
   { country: "Monthly", code: "355", iso: "AL" },
-
-]
-
-
-
-
-export const Account = [
-  { country: "Saving Account", code: "SB", iso: "AF" },
-  { country: "Current Account", code: "CB", iso: "AL" },
 ];
 
+export const Account = [
+  { country: "Saving Account", code: "SB", },
+  { country: "Current Account", code: "CB", },
+];
 
 export const Nominee = [
   { country: "Father", code: "Father", iso: "AF" },
@@ -268,15 +262,45 @@ export const Nominee = [
   { country: "Relative", code: "Relative", iso: "AL" },
 ];
 
-
-
 export const State = [
-  { country: "Maharashtra", code: "MA", iso: "AF" },
-  { country: "Gujarat", code: "GJ", iso: "AL" },
-
+  { country: "Andaman & Nicobar", code: "AN" },
+  { country: "Arunachal Pradesh", code: "AR" },
+  { country: "Andhra Pradesh", code: "AP" },
+  { country: "Assam", code: "AS" },
+  { country: "Bihar", code: "BH" },
+  { country: "Chandigarh", code: "CH" },
+  { country: "Chhattisgarh", code: "CG" },
+  { country: "Goa", code: "GO" },
+  { country: "Gujarat", code: "GU" },
+  { country: "Haryana", code: "HA" },
+  { country: "Himachal Pradesh", code: "HP" },
+  { country: "Jammu & Kashmir", code: "JM" },
+  { country: "Jharkhand", code: "JK" },
+  { country: "Karnataka", code: "KA" },
+  { country: "Kerala", code: "KE" },
+  { country: "Madhya Pradesh", code: "MP" },
+  { country: "Maharashtra", code: "MA" },
+  { country: "Manipur", code: "MN" },
+  { country: "Meghalaya", code: "ME" },
+  { country: "Mizoram", code: "MI" },
+  { country: "Nagaland", code: "NA" },
+  { country: "New Delhi", code: "ND" },
+  { country: "Orissa", code: "OR" },
+  { country: "Pondicherry", code: "PO" },
+  { country: "Punjab", code: "PU" },
+  { country: "Rajasthan", code: "RA" },
+  { country: "Sikkim", code: "SI" },
+  { country: "Telengana", code: "TG" },
+  { country: "Tamil Nadu", code: "TN" },
+  { country: "Tripura", code: "TR" },
+  { country: "Uttar Pradesh", code: "UP" },
+  { country: "Uttaranchal", code: "UC" },
+  { country: "West Bengal", code: "WB" },
+  { country: "Dadra and Nagar Haveli", code: "DN" },
+  { country: "Daman and Diu", code: "DD" },
+  { country: "Lakshadweep", code: "LD" },
+  { country: "Others", code: "OH" },
 ];
-
-
 
 export const Frequency = [
   { country: "Daily", code: "Daily", iso: "AF" },
