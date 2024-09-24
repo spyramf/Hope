@@ -8,6 +8,7 @@ import {
   Dimensions,
   TouchableHighlight,
   ScrollView,
+  
 } from "react-native";
 import { Image } from "expo-image";
 import OnBtn from "../../components/MultiUseApp/OnBtn";
