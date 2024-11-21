@@ -68,10 +68,7 @@ const EmailAddress = () => {
       }
     } catch (error) {
       console.error("Failed to process email:", error);
-      Alert.alert(
-        "Error",
-        "There was an issue submitting your email. Please check your connection and try again."
-      );
+    
     }
   };
 
